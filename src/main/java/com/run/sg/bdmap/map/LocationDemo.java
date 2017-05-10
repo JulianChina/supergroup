@@ -7,11 +7,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.RadioGroup;
+import android.widget.EditText;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.Toast;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
@@ -23,21 +22,28 @@ import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
-
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeOption;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.run.sg.bdmap.R;
 
 /**
  * 此demo用来展示如何结合定位SDK实现定位，并使用MyLocationOverlay绘制定位位置 同时展示如何使用自定义图标绘制并点击时弹出泡泡
  */
-public class LocationDemo extends Activity implements SensorEventListener {
+public class LocationDemo extends Activity implements SensorEventListener, OnGetGeoCoderResultListener {
 
     // 定位相关
     LocationClient mLocClient;
     public MyLocationListenner myListener = new MyLocationListenner();
+    GeoCoder mSearch = null; // 搜索模块，也可去掉地图模块独立使用
     private LocationMode mCurrentMode;
     BitmapDescriptor mCurrentMarker;
     private static final int accuracyCircleFillColor = 0xAAFFFF88;
@@ -54,7 +60,6 @@ public class LocationDemo extends Activity implements SensorEventListener {
 
     // UI相关
     OnCheckedChangeListener radioButtonListener;
-    Button requestLocButton;
     boolean isFirstLoc = true; // 是否首次定位
     private MyLocationData locData;
     private float direction;
@@ -64,67 +69,20 @@ public class LocationDemo extends Activity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_location);
-        requestLocButton = (Button) findViewById(R.id.mode_button);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);//获取传感器管理服务
-        mCurrentMode = LocationMode.NORMAL;
-        requestLocButton.setText("普通");
-        requestLocButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                switch (mCurrentMode) {
-                    case NORMAL:
-                        requestLocButton.setText("跟随");
-                        mCurrentMode = LocationMode.FOLLOWING;
-                        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                mCurrentMode, true, mCurrentMarker));
-                        MapStatus.Builder builder = new MapStatus.Builder();
-                        builder.overlook(0);
-                        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-                        break;
-                    case FOLLOWING:
-                        requestLocButton.setText("罗盘");
-                        mCurrentMode = LocationMode.COMPASS;
-                        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                mCurrentMode, true, mCurrentMarker));
-                        break;
-                    case COMPASS:
-                        requestLocButton.setText("普通");
-                        mCurrentMode = LocationMode.NORMAL;
-                        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                mCurrentMode, true, mCurrentMarker));
-                        MapStatus.Builder builder1 = new MapStatus.Builder();
-                        builder1.overlook(0);
-                        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder1.build()));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-
-        RadioGroup group = (RadioGroup) this.findViewById(R.id.radioGroup);
-        group.setOnCheckedChangeListener(radioButtonListener);
-        radioButtonListener = new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.defaulticon) {
-                    // 传入null则，恢复默认图标
-                    mCurrentMarker = null;
-                    mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
-                                    mCurrentMode, true, null));
-                }
-                if (checkedId == R.id.customicon) {
-                    // 修改为自定义marker
-                    mCurrentMarker = BitmapDescriptorFactory.fromResource(R.drawable.icon_geo);
-                    mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                            mCurrentMode, true, mCurrentMarker,
-                            accuracyCircleFillColor, accuracyCircleStrokeColor));
-                }
-            }
-        };
 
         // 地图初始化
         mMapView = (MapView) findViewById(R.id.bmapView);
         mBaiduMap = mMapView.getMap();
+
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);//获取传感器管理服务
+        mCurrentMode = LocationMode.NORMAL;
+        mCurrentMode = LocationMode.FOLLOWING;
+        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
+                mCurrentMode, true, mCurrentMarker));
+        MapStatus.Builder builder = new MapStatus.Builder();
+        builder.overlook(0);
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+
         // 开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
         // 定位初始化
@@ -136,6 +94,11 @@ public class LocationDemo extends Activity implements SensorEventListener {
         option.setScanSpan(1000);
         mLocClient.setLocOption(option);
         mLocClient.start();
+
+        // 初始化搜索模块，注册事件监听
+        mSearch = GeoCoder.newInstance();
+        mSearch.setOnGetGeoCodeResultListener(this);
+
     }
 
     @Override
@@ -159,6 +122,21 @@ public class LocationDemo extends Activity implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+    /**
+     * 发起搜索
+     *
+     * @param v
+     */
+    public void searchButtonProcess(View v) {
+        if (v.getId() == R.id.geocode) {
+            EditText editCity = (EditText) findViewById(R.id.city);
+            EditText editGeoCodeKey = (EditText) findViewById(R.id.geocodekey);
+            // Geo搜索
+            mSearch.geocode(new GeoCodeOption().city(
+                    editCity.getText().toString()).address(editGeoCodeKey.getText().toString()));
+        }
     }
 
     /**
@@ -198,7 +176,7 @@ public class LocationDemo extends Activity implements SensorEventListener {
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume () {
         mMapView.onResume();
         super.onResume();
         //为系统的方向传感器注册监听器
@@ -207,20 +185,20 @@ public class LocationDemo extends Activity implements SensorEventListener {
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause () {
         mMapView.onPause();
         super.onPause();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop () {
         //取消注册传感器监听
         mSensorManager.unregisterListener(this);
         super.onStop();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy () {
         // 退出时销毁定位
         mLocClient.stop();
         // 关闭定位图层
@@ -230,5 +208,24 @@ public class LocationDemo extends Activity implements SensorEventListener {
         super.onDestroy();
     }
 
+    @Override
+    public void onGetGeoCodeResult(GeoCodeResult result) {
+        if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+            Toast.makeText(this, "抱歉，未能找到结果", Toast.LENGTH_LONG).show();
+            return;
+        }
+        mBaiduMap.clear();
+        mBaiduMap.addOverlay(new MarkerOptions().position(result.getLocation())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_marka)));
+        mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(result.getLocation()));
+        String strInfo = String.format("纬度：%f 经度：%f",
+                result.getLocation().latitude, result.getLocation().longitude);
+        Toast.makeText(this, strInfo, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onGetReverseGeoCodeResult(ReverseGeoCodeResult result) {
+
+    }
 
 }

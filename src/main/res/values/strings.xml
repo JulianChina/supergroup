@@ -129,8 +129,11 @@
     <string name="instruction">当设计的UI与地图部分重叠时，设置地图的padding值,以防止UI遮挡</string>
     <string name="ad_notification_str">您身边的好事！</string>
     <string name="shopping_notification_str">您身边的好事资讯平台！</string>
-    <string name="nav_btn_str">导航</string>
+    <string name="soft_article_str">总有一件事是你感兴趣的......</string>
     <string name="tip_btn_str">打赏</string>
+    <string name="city">深圳</string>
+    <string name="address">松坪山公园</string>
+    <string name="geo">Geo</string>
 
 
 </resources>

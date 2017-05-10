@@ -7,46 +7,52 @@
         android:id="@+id/ad_notification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="32dp"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/ad_notification_margin_left"
+        android:gravity="center_vertical"
         android:text="@string/ad_notification_str"/>
 
     <TextView
         android:id="@+id/shopping_notification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="32dp"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/ad_notification_margin_left"
+        android:gravity="center_vertical"
         android:text="@string/shopping_notification_str"/>
 
-    <LinearLayout
-        android:id="@+id/nav_tip_layout"
+    <RelativeLayout
+        android:id="@+id/soft_article_tip_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_dark"
         android:layout_above="@id/shopping_notification">
-        <Button
-            android:id="@+id/nav_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/nav_btn_str"/>
-
         <Button
             android:id="@+id/tip_btn"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:gravity="center"
             android:text="@string/tip_btn_str"/>
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/soft_article"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/tip_btn"
+            android:layout_marginLeft="@dimen/ad_notification_margin_left"
+            android:layout_centerVertical="true"
+            android:text="@string/soft_article_str"/>
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/bdmap_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/nav_tip_layout"
+        android:layout_above="@id/soft_article_tip_layout"
         android:layout_below="@id/ad_notification">
         <com.baidu.mapapi.map.MapView
             android:id="@+id/bmapView"
@@ -54,47 +60,41 @@
             android:layout_height="fill_parent"
             android:clickable="true" />
 
-        <LinearLayout
-            android:id="@+id/icon_layout"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="80dip"
-            android:background="#D000"
-            android:minWidth="100dip"
-            android:orientation="vertical"
-            android:padding="2dp" >
-
-            <RadioGroup
-                android:id="@+id/radioGroup"
+            android:background="@android:color/holo_green_dark"
+            android:orientation="horizontal" >
+            <Button
+                android:id="@+id/geocode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="定位icon" >
+                android:layout_alignParentRight="true"
+                android:onClick="searchButtonProcess"
+                android:text="@string/geo" />
 
-                <RadioButton
-                    android:id="@+id/defaulticon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="默认图标" >
-                </RadioButton>
+            <EditText
+                android:id="@+id/city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="@dimen/ad_notification_margin_left"
+                android:text="@string/city" />
 
-                <RadioButton
-                    android:id="@+id/customicon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="自定义图标" >
-                </RadioButton>
-            </RadioGroup>
-        </LinearLayout>
+            <EditText
+                android:id="@+id/geocodekey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/city"
+                android:layout_toLeftOf="@id/geocode"
+                android:layout_marginLeft="@dimen/ad_notification_margin_left"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="@string/address" />
 
-        <Button
-            android:id="@+id/mode_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/icon_layout"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="10dip" />
+        </RelativeLayout>
+
     </RelativeLayout>
 
 </RelativeLayout>

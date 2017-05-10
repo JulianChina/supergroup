@@ -5,5 +5,5 @@
     <dimen name="custom_profile_image">50dp</dimen>
     <dimen name="custom_profile_padding">2dp</dimen>
     <dimen name="ad_notification_height">32dp</dimen>
-    <dimen name="ad_notification_margin_left">16dp</dimen>
+    <dimen name="ad_notification_margin_left">8dp</dimen>
 </resources>

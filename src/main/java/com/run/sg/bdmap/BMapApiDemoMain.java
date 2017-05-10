@@ -86,7 +86,7 @@ public class BMapApiDemoMain extends Activity {
         TextView text = (TextView) findViewById(R.id.text_Info);
         text.setTextColor(Color.YELLOW);
         text.setText("欢迎使用百度地图Android SDK v" + VersionInfo.getApiVersion());
-        setTitle(getTitle() + " v" + VersionInfo.getApiVersion());
+        setTitle(getString(R.string.activity_name));
         ListView mListView = (ListView) findViewById(R.id.listView);
         // 添加ListItem，设置事件响应
         mListView.setAdapter(new DemoListAdapter());

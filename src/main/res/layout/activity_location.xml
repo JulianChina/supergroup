@@ -3,52 +3,98 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/bmapView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:clickable="true" />
+    <TextView
+        android:id="@+id/ad_notification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/ad_notification_margin_left"
+        android:text="@string/ad_notification_str"/>
+
+    <TextView
+        android:id="@+id/shopping_notification"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/ad_notification_margin_left"
+        android:text="@string/shopping_notification_str"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/nav_tip_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="80dip"
-        android:background="#D000"
-        android:minWidth="100dip"
-        android:orientation="vertical"
-        android:padding="2dp" >
-
-        <RadioGroup
-            android:id="@+id/radioGroup"
+        android:layout_above="@id/shopping_notification">
+        <Button
+            android:id="@+id/nav_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="定位icon" >
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/nav_btn_str"/>
 
-            <RadioButton
-                android:id="@+id/defaulticon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="默认图标" >
-            </RadioButton>
+        <Button
+            android:id="@+id/tip_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/tip_btn_str"/>
 
-            <RadioButton
-                android:id="@+id/customicon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="自定义图标" >
-            </RadioButton>
-        </RadioGroup>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="10dip" />
+    <RelativeLayout
+        android:id="@+id/bdmap_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/nav_tip_layout"
+        android:layout_below="@id/ad_notification">
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/bmapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:clickable="true" />
+
+        <LinearLayout
+            android:id="@+id/icon_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="80dip"
+            android:background="#D000"
+            android:minWidth="100dip"
+            android:orientation="vertical"
+            android:padding="2dp" >
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="定位icon" >
+
+                <RadioButton
+                    android:id="@+id/defaulticon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="默认图标" >
+                </RadioButton>
+
+                <RadioButton
+                    android:id="@+id/customicon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义图标" >
+                </RadioButton>
+            </RadioGroup>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/icon_layout"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dip" />
+    </RelativeLayout>
 
 </RelativeLayout>

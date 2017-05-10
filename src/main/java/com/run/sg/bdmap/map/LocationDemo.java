@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
@@ -61,67 +62,65 @@ public class LocationDemo extends Activity implements SensorEventListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_location);
-        requestLocButton = (Button) findViewById(R.id.button1);
+        requestLocButton = (Button) findViewById(R.id.mode_button);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);//获取传感器管理服务
         mCurrentMode = LocationMode.NORMAL;
         requestLocButton.setText("普通");
-        OnClickListener btnClickListener = new OnClickListener() {
+        requestLocButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 switch (mCurrentMode) {
                     case NORMAL:
                         requestLocButton.setText("跟随");
                         mCurrentMode = LocationMode.FOLLOWING;
                         mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                        mCurrentMode, true, mCurrentMarker));
+                                mCurrentMode, true, mCurrentMarker));
                         MapStatus.Builder builder = new MapStatus.Builder();
                         builder.overlook(0);
                         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-                        break;
-                    case COMPASS:
-                        requestLocButton.setText("普通");
-                        mCurrentMode = LocationMode.NORMAL;
-                        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                        mCurrentMode, true, mCurrentMarker));
-                        MapStatus.Builder builder1 = new MapStatus.Builder();
-                        builder1.overlook(0);
-                        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder1.build()));
                         break;
                     case FOLLOWING:
                         requestLocButton.setText("罗盘");
                         mCurrentMode = LocationMode.COMPASS;
                         mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                        mCurrentMode, true, mCurrentMarker));
+                                mCurrentMode, true, mCurrentMarker));
+                        break;
+                    case COMPASS:
+                        requestLocButton.setText("普通");
+                        mCurrentMode = LocationMode.NORMAL;
+                        mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
+                                mCurrentMode, true, mCurrentMarker));
+                        MapStatus.Builder builder1 = new MapStatus.Builder();
+                        builder1.overlook(0);
+                        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder1.build()));
                         break;
                     default:
                         break;
                 }
             }
-        };
-        requestLocButton.setOnClickListener(btnClickListener);
+        });
 
         RadioGroup group = (RadioGroup) this.findViewById(R.id.radioGroup);
+        group.setOnCheckedChangeListener(radioButtonListener);
         radioButtonListener = new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.defaulticon) {
                     // 传入null则，恢复默认图标
                     mCurrentMarker = null;
-                    mBaiduMap
-                            .setMyLocationConfigeration(new MyLocationConfiguration(
+                    mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
                                     mCurrentMode, true, null));
                 }
                 if (checkedId == R.id.customicon) {
                     // 修改为自定义marker
-                    mCurrentMarker = BitmapDescriptorFactory
-                            .fromResource(R.drawable.icon_geo);
+                    mCurrentMarker = BitmapDescriptorFactory.fromResource(R.drawable.icon_geo);
                     mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                                    mCurrentMode, true, mCurrentMarker,
-                                    accuracyCircleFillColor, accuracyCircleStrokeColor));
+                            mCurrentMode, true, mCurrentMarker,
+                            accuracyCircleFillColor, accuracyCircleStrokeColor));
                 }
             }
         };
-        group.setOnCheckedChangeListener(radioButtonListener);
 
         // 地图初始化
         mMapView = (MapView) findViewById(R.id.bmapView);
@@ -147,8 +146,10 @@ public class LocationDemo extends Activity implements SensorEventListener {
             locData = new MyLocationData.Builder()
                     .accuracy(mCurrentAccracy)
                     // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(mCurrentDirection).latitude(mCurrentLat)
-                    .longitude(mCurrentLon).build();
+                    .direction(mCurrentDirection)
+                    .latitude(mCurrentLat)
+                    .longitude(mCurrentLon)
+                    .build();
             mBaiduMap.setMyLocationData(locData);
         }
         lastX = x;
@@ -177,8 +178,10 @@ public class LocationDemo extends Activity implements SensorEventListener {
             locData = new MyLocationData.Builder()
                     .accuracy(location.getRadius())
                     // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(mCurrentDirection).latitude(location.getLatitude())
-                    .longitude(location.getLongitude()).build();
+                    .direction(mCurrentDirection)
+                    .latitude(location.getLatitude())
+                    .longitude(location.getLongitude())
+                    .build();
             mBaiduMap.setMyLocationData(locData);
             if (isFirstLoc) {
                 isFirstLoc = false;
@@ -195,18 +198,18 @@ public class LocationDemo extends Activity implements SensorEventListener {
     }
 
     @Override
-    protected void onPause() {
-        mMapView.onPause();
-        super.onPause();
-    }
-
-    @Override
     protected void onResume() {
         mMapView.onResume();
         super.onResume();
         //为系统的方向传感器注册监听器
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
                 SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    protected void onPause() {
+        mMapView.onPause();
+        super.onPause();
     }
 
     @Override

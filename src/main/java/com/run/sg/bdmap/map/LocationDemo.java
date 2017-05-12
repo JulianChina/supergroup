@@ -1,14 +1,21 @@
 package com.run.sg.bdmap.map;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Toast;
 
@@ -27,18 +34,41 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.overlayutil.WalkingRouteOverlay;
+import com.baidu.mapapi.search.core.RouteLine;
 import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.geocode.GeoCodeOption;
 import com.baidu.mapapi.search.geocode.GeoCodeResult;
 import com.baidu.mapapi.search.geocode.GeoCoder;
 import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
+import com.baidu.mapapi.search.route.BikingRouteResult;
+import com.baidu.mapapi.search.route.DrivingRouteResult;
+import com.baidu.mapapi.search.route.IndoorRouteResult;
+import com.baidu.mapapi.search.route.MassTransitRouteResult;
+import com.baidu.mapapi.search.route.OnGetRoutePlanResultListener;
+import com.baidu.mapapi.search.route.PlanNode;
+import com.baidu.mapapi.search.route.RoutePlanSearch;
+import com.baidu.mapapi.search.route.TransitRouteResult;
+import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
+import com.baidu.mapapi.search.route.WalkingRouteResult;
 import com.run.sg.bdmap.R;
+import com.run.sg.bdmap.search.RouteLineAdapter;
+import com.run.sg.bdmap.search.RoutePlanDemo;
+
+import java.util.List;
 
 /**
  * 此demo用来展示如何结合定位SDK实现定位，并使用MyLocationOverlay绘制定位位置 同时展示如何使用自定义图标绘制并点击时弹出泡泡
  */
 public class LocationDemo extends Activity implements SensorEventListener, OnGetGeoCoderResultListener {
+
+    // 搜索相关
+    RoutePlanSearch mSearchRoute = null;    // 搜索模块，也可去掉地图模块独立使用
+    boolean hasShownDialogue = false;
+    WalkingRouteResult nowResultwalk = null;
+    PlanNode stNode, edNode;
+    RouteLine route = null;
 
     // 定位相关
     LocationClient mLocClient;
@@ -76,7 +106,6 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);//获取传感器管理服务
         mCurrentMode = LocationMode.NORMAL;
-        mCurrentMode = LocationMode.FOLLOWING;
         mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
                 mCurrentMode, true, mCurrentMarker));
         MapStatus.Builder builder = new MapStatus.Builder();
@@ -91,14 +120,16 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
         LocationClientOption option = new LocationClientOption();
         option.setOpenGps(true); // 打开gps
         option.setCoorType("bd09ll"); // 设置坐标类型
-        option.setScanSpan(1000);
+        //option.setScanSpan(1000);
         mLocClient.setLocOption(option);
         mLocClient.start();
 
         // 初始化搜索模块，注册事件监听
         mSearch = GeoCoder.newInstance();
         mSearch.setOnGetGeoCodeResultListener(this);
-
+       // 初始化搜索模块，注册事件监听
+        mSearchRoute = RoutePlanSearch.newInstance();
+        mSearchRoute.setOnGetRoutePlanResultListener(mGetRoutePlanResultListener);
     }
 
     @Override
@@ -169,6 +200,7 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
                 builder.target(ll).zoom(18.0f);
                 mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
+            stNode = PlanNode.withLocation(new LatLng(location.getLatitude(),location.getLongitude()));
         }
 
         public void onReceivePoi(BDLocation poiLocation) {
@@ -215,17 +247,182 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
             return;
         }
         mBaiduMap.clear();
-        mBaiduMap.addOverlay(new MarkerOptions().position(result.getLocation())
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_marka)));
+//        mBaiduMap.addOverlay(new MarkerOptions().position(result.getLocation())
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_marka)));
         mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(result.getLocation()));
-        String strInfo = String.format("纬度：%f 经度：%f",
+        /*String strInfo = String.format("纬度：%f 经度：%f",
                 result.getLocation().latitude, result.getLocation().longitude);
-        Toast.makeText(this, strInfo, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, strInfo, Toast.LENGTH_LONG).show();*/
+
+        edNode = PlanNode.withLocation(result.getLocation());
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mSearchRoute.walkingSearch((new WalkingRoutePlanOption())
+                        .from(stNode).to(edNode));
+            }
+        },1000);
+
     }
 
     @Override
     public void onGetReverseGeoCodeResult(ReverseGeoCodeResult result) {
 
+    }
+
+    OnGetRoutePlanResultListener mGetRoutePlanResultListener = new OnGetRoutePlanResultListener() {
+        @Override
+        public void onGetWalkingRouteResult(WalkingRouteResult result) {
+            if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+                Toast.makeText(LocationDemo.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+            }
+            if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
+                // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
+                // result.getSuggestAddrInfo()
+                return;
+            }
+            if (result.error == SearchResult.ERRORNO.NO_ERROR) {
+
+                if (result.getRouteLines().size() > 1) {
+                    nowResultwalk = result;
+                    if (!hasShownDialogue) {
+                        MyTransitDlg myTransitDlg = new MyTransitDlg(LocationDemo.this,
+                                result.getRouteLines(),
+                                RouteLineAdapter.Type.WALKING_ROUTE);
+                        myTransitDlg.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                hasShownDialogue = false;
+                            }
+                        });
+                        myTransitDlg.setOnItemInDlgClickLinster(new OnItemInDlgClickListener() {
+                            public void onItemClick(int position) {
+                                route = nowResultwalk.getRouteLines().get(position);
+                                WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaiduMap);
+                                mBaiduMap.setOnMarkerClickListener(overlay);
+                                overlay.setData(nowResultwalk.getRouteLines().get(position));
+                                overlay.addToMap();
+                                overlay.zoomToSpan();
+                            }
+                        });
+                        myTransitDlg.show();
+                        hasShownDialogue = true;
+                    }
+                } else if (result.getRouteLines().size() == 1) {
+                    // 直接显示
+                    route = result.getRouteLines().get(0);
+                    WalkingRouteOverlay overlay = new MyWalkingRouteOverlay(mBaiduMap);
+                    mBaiduMap.setOnMarkerClickListener(overlay);
+                    overlay.setData(result.getRouteLines().get(0));
+                    overlay.addToMap();
+                    overlay.zoomToSpan();
+                } else {
+                    Log.d("route result", "结果数<0");
+                    return;
+                }
+        }
+
+        }
+
+
+        @Override
+        public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+
+        }
+
+        @Override
+        public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
+
+        }
+
+        @Override
+        public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+
+        }
+    };
+
+    // 供路线选择的Dialog
+    class MyTransitDlg extends Dialog {
+
+        private List<? extends RouteLine> mtransitRouteLines;
+        private ListView transitRouteList;
+        private RouteLineAdapter mTransitAdapter;
+
+        OnItemInDlgClickListener onItemInDlgClickListener;
+
+        public MyTransitDlg(Context context, int theme) {
+            super(context, theme);
+        }
+
+        public MyTransitDlg(Context context, List<? extends RouteLine> transitRouteLines, RouteLineAdapter.Type
+                type) {
+            this(context, 0);
+            mtransitRouteLines = transitRouteLines;
+            mTransitAdapter = new RouteLineAdapter(context, mtransitRouteLines, type);
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+
+        @Override
+        public void setOnDismissListener(OnDismissListener listener) {
+            super.setOnDismissListener(listener);
+        }
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_transit_dialog);
+
+            transitRouteList = (ListView) findViewById(R.id.transitList);
+            transitRouteList.setAdapter(mTransitAdapter);
+
+            transitRouteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    onItemInDlgClickListener.onItemClick(position);
+                    dismiss();
+                    hasShownDialogue = false;
+                }
+            });
+        }
+
+        public void setOnItemInDlgClickLinster(OnItemInDlgClickListener itemListener) {
+            onItemInDlgClickListener = itemListener;
+        }
+
+    }
+
+    // 响应DLg中的List item 点击
+    interface OnItemInDlgClickListener {
+        void onItemClick(int position);
+    }
+
+    private class MyWalkingRouteOverlay extends WalkingRouteOverlay {
+
+        public MyWalkingRouteOverlay(BaiduMap baiduMap) {
+            super(baiduMap);
+        }
+
+        @Override
+        public BitmapDescriptor getStartMarker() {
+            return BitmapDescriptorFactory.fromResource(R.drawable.icon_st);
+        }
+
+        @Override
+        public BitmapDescriptor getTerminalMarker() {
+            return BitmapDescriptorFactory.fromResource(R.drawable.icon_en);
+        }
     }
 
 }

@@ -49,10 +49,7 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
         <activity
             android:name="com.run.sg.bdmap.map.BaseMapDemo"
@@ -93,8 +90,12 @@
         <activity
             android:name="com.run.sg.bdmap.map.LocationDemo"
             android:configChanges="orientation|keyboardHidden"
-            android:label="@string/demo_name_location"
+            android:label="@string/app_name"
             android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.run.sg.bdmap.map.MapControlDemo"

@@ -135,5 +135,19 @@
     <string name="address">松坪山公园</string>
     <string name="geo">Geo</string>
 
+    <!--主界面UI-->
+    <string name="found_text">发现</string>
+    <string name="navigation_text">导航</string>
+    <string name="good_you_text">好事平台</string>
+    <string name="about_us_text">关于我们</string>
+
+    <array name="found_dialog_list_content">
+        <item>捐赠点</item>
+        <item>敬老院</item>
+        <item>失物招领处</item>
+        <item>福利院</item>
+    </array>
+
+    <string name="search_hint_text">搜索</string>
 
 </resources>

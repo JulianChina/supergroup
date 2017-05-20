@@ -3,98 +3,146 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/ad_notification"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="32dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="@dimen/ad_notification_margin_left"
-        android:gravity="center_vertical"
-        android:text="@string/ad_notification_str"/>
-
-    <TextView
-        android:id="@+id/shopping_notification"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="32dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/ad_notification_margin_left"
-        android:gravity="center_vertical"
-        android:text="@string/shopping_notification_str"/>
-
     <RelativeLayout
-        android:id="@+id/soft_article_tip_layout"
+        android:id="@+id/advertise_view_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_green_dark"
-        android:layout_above="@id/shopping_notification">
-        <Button
-            android:id="@+id/tip_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:gravity="center"
-            android:text="@string/tip_btn_str"/>
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true">
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v4.view.ViewPager>
 
-        <TextView
-            android:id="@+id/soft_article"
+        <LinearLayout
+            android:id="@+id/imgTipsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/tip_btn"
-            android:layout_marginLeft="@dimen/ad_notification_margin_left"
-            android:layout_centerVertical="true"
-            android:text="@string/soft_article_str"/>
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="5dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+        </LinearLayout>
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:minHeight="60dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:background="@color/bottom_bar_bac">
+
+        <LinearLayout
+            android:id="@+id/found_layout"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@mipmap/found"
+                android:gravity="center_horizontal"
+                android:textSize="12sp"
+                android:textColor="@color/bottom_bar_text_color"
+                android:clickable="false"
+                android:text="@string/found_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/good_you_layout"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@mipmap/good_you"
+                android:gravity="center_horizontal"
+                android:textSize="12sp"
+                android:clickable="false"
+                android:textColor="@color/bottom_bar_text_color"
+                android:text="@string/good_you_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/about_us_layout"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:onClick="">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@mipmap/about_us"
+                android:gravity="center_horizontal"
+                android:textSize="12sp"
+                android:textColor="@color/bottom_bar_text_color"
+                android:clickable="false"
+                android:text="@string/about_us_text"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/bdmap_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/soft_article_tip_layout"
-        android:layout_below="@id/ad_notification">
+        android:layout_above="@id/bottom_bar"
+        android:layout_below="@id/advertise_view_pager">
         <com.baidu.mapapi.map.MapView
             android:id="@+id/bmapView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="true" />
 
-        <RelativeLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/holo_green_dark"
-            android:orientation="horizontal" >
-            <Button
-                android:id="@+id/geocode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:onClick="searchButtonProcess"
-                android:text="@string/geo" />
+        <ImageButton
+            android:id="@+id/search"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="30dp"
+            android:src="@mipmap/search" />
 
-            <EditText
-                android:id="@+id/city"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="@dimen/ad_notification_margin_left"
-                android:text="@string/city" />
-
-            <EditText
-                android:id="@+id/geocodekey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/city"
-                android:layout_toLeftOf="@id/geocode"
-                android:layout_marginLeft="@dimen/ad_notification_margin_left"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:text="@string/address" />
-
-        </RelativeLayout>
+        <ImageButton
+            android:id="@+id/upload"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="160dp"
+            android:layout_marginRight="30dp"
+            android:src="@mipmap/upload"/>
 
     </RelativeLayout>
+
+    <ListView
+        android:id="@+id/found_dialog_listview"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_above="@id/bottom_bar"
+        android:background="@color/bottom_bar_bac"
+        android:visibility="gone">
+
+    </ListView>
 
 </RelativeLayout>

@@ -41,4 +41,5 @@ public class SearchActivity extends Activity {
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
     }
+
 }

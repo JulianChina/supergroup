@@ -27,4 +27,8 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
+    <style name="About_Us_Activity_Theme">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

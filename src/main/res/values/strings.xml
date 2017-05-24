@@ -149,5 +149,9 @@
     </array>
 
     <string name="search_hint_text">搜索</string>
+    <string name="fruit_kind">水果</string>
+    <string name="vegetables_kind">蔬菜</string>
+    <string name="drink_kind">饮料</string>
+    <string name="more_kind">更多</string>
 
 </resources>

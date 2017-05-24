@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -62,6 +64,7 @@ import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
 import com.run.sg.bdmap.R;
+import com.run.sg.bdmap.about_us.About_Us_Activity;
 import com.run.sg.bdmap.found.foundDialogListviewAdapter;
 import com.run.sg.bdmap.search.RouteLineAdapter;
 import com.run.sg.bdmap.search.RoutePlanDemo;
@@ -510,18 +513,37 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
      */
     private void initImageViewList() {
 
-        imageUrls = new String[] {
+        /*imageUrls = new String[] {
                 "http://h.hiphotos.baidu.com/image/pic/item/9825bc315c6034a8d141851dce1349540823768e.jpg",
                 "http://e.hiphotos.baidu.com/image/pic/item/f9198618367adab49eb71beb8ed4b31c8701e437.jpg",
                 "http://d.hiphotos.baidu.com/image/pic/item/9345d688d43f8794675c75b2d71b0ef41ad53a8e.jpg",
                 "http://a.hiphotos.baidu.com/image/pic/item/55e736d12f2eb938d3de795ad0628535e4dd6fe2.jpg",
                 "http://h.hiphotos.baidu.com/image/pic/item/9825bc315c6034a8d141851dce1349540823768e.jpg",
-                "http://e.hiphotos.baidu.com/image/pic/item/f9198618367adab49eb71beb8ed4b31c8701e437.jpg" };
+                "http://e.hiphotos.baidu.com/image/pic/item/f9198618367adab49eb71beb8ed4b31c8701e437.jpg" };*/
+
+        imageUrls = new String[] {
+                "advertise_pic_6",
+                "advertise_pic_1","advertise_pic_2","advertise_pic_3",
+                "advertise_pic_4","advertise_pic_5","advertise_pic_6"
+                ,"advertise_pic_1"
+        };
+
+        Resources res = this.getResources();
+
+        Integer[] drawableId = new Integer[]{
+                R.drawable.advertise_pic_6,
+                R.drawable.advertise_pic_1,R.drawable.advertise_pic_2,
+                R.drawable.advertise_pic_3,R.drawable.advertise_pic_4,
+                R.drawable.advertise_pic_5,R.drawable.advertise_pic_6,
+                R.drawable.advertise_pic_1
+        };
 
         for (int i = 0; i < imageUrls.length; i++) {
             ImageView imageView = new ImageView(LocationDemo.this);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            imageView.setTag(imageUrls[i]);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            //imageView.setTag(imageUrls[i]);
+            Drawable draw = res.getDrawable(drawableId[i],null);
+            imageView.setImageDrawable(draw);
             imageViewList.add(imageView);
         }
     }
@@ -621,8 +643,8 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
             // TODO Auto-generated method stub
 
             final ImageView imageView = imageViewList.get(position);
-            imageLoader.displayImage(imageView.getTag().toString(), imageView,
-                    options);
+            /*imageLoader.displayImage(imageView.getTag().toString(), imageView,
+                    options);*/
 
             imageView.setOnClickListener(new View.OnClickListener() {
 
@@ -727,6 +749,8 @@ public class LocationDemo extends Activity implements SensorEventListener, OnGet
                     if (mFoundDialogListview != null && mFoundDialogListview.getVisibility() == View.VISIBLE){
                         mFoundDialogListview.setVisibility(View.GONE);
                     }
+                    Intent intent = new Intent(LocationDemo.this, About_Us_Activity.class);
+                    startActivity(intent);
                     break;
                 default:
                     if (mFoundDialogListview != null && mFoundDialogListview.getVisibility() == View.VISIBLE){

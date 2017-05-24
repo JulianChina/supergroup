@@ -256,6 +256,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".about_us.About_Us_Activity"
+            android:theme="@style/About_Us_Activity_Theme"/>
+
     </application>
 
 </manifest>
